@@ -1,0 +1,110 @@
+:root {
+  color-scheme: dark;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #100f17;
+  color: #f3eef9;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; min-height: 100%; }
+
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 256px;
+  flex: 0 0 256px;
+  padding: 28px 22px;
+  background: #191722;
+  border-right: 1px solid #322d3c;
+}
+
+h1 { margin: 0 0 39px; font-size: 17px; font-weight: 750; letter-spacing: .16em; }
+
+h2 {
+  margin: 0 0 18px;
+  color: #b9aeca;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .17em;
+}
+
+section { margin: 0 0 36px; }
+
+label {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin: 17px 0 7px;
+  font-size: 14px;
+}
+
+label output { margin-left: auto; font-variant-numeric: tabular-nums; color: #ede2ff; }
+.notation { color: #ad9eba; font-size: 12px; }
+
+input[type="range"] {
+  display: block;
+  width: 100%;
+  margin: 0;
+  accent-color: #be8cff;
+  cursor: pointer;
+}
+
+.workspace { display: flex; flex: 1; min-width: 0; flex-direction: column; }
+
+.toolbar {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 26px;
+}
+
+.actions { display: flex; flex-wrap: wrap; gap: 9px; }
+
+button {
+  min-height: 36px;
+  padding: 7px 13px;
+  border: 1px solid #5e536d;
+  border-radius: 5px;
+  background: #25202f;
+  color: #f6f0fa;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+button:hover { background: #342943; }
+button:focus-visible, input:focus-visible { outline: 2px solid #d0a6ff; outline-offset: 3px; }
+
+#status { margin: 0; color: #b9aeca; font-size: 12px; }
+#status:empty { display: none; }
+
+.canvas-wrap {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  place-items: center;
+  padding: 0 24px 24px;
+}
+
+canvas {
+  display: block;
+  width: min(100%, calc((100vh - 124px) * 5 / 3));
+  height: auto;
+  aspect-ratio: 5 / 3;
+  background: #080711;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+@media (max-width: 760px) {
+  .layout { flex-direction: column; }
+  .sidebar { width: 100%; flex-basis: auto; padding: 18px; }
+  h1 { margin-bottom: 18px; }
+  section { display: inline-block; width: min(31%, 230px); margin: 0 1% 10px 0; vertical-align: top; }
+  .toolbar { padding: 12px 18px; }
+  .canvas-wrap { padding: 0 12px 12px; }
+  canvas { width: 100%; }
+}

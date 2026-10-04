@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Living Canvas</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar" aria-label="Canvas controls">
+        <h1>LIVING CANVAS</h1>
+
+        <section aria-labelledby="brush-heading">
+          <h2 id="brush-heading">BRUSH</h2>
+          <label for="brush-size">Size <output id="brush-size-value" for="brush-size">6</output></label>
+          <input id="brush-size" type="range" min="1" max="20" step="1" value="6">
+        </section>
+
+        <section aria-labelledby="state-heading">
+          <h2 id="state-heading">STATE</h2>
+          <label for="intensity">Intensity <span class="notation">p</span> <output id="intensity-value" for="intensity">0.80</output></label>
+          <input id="intensity" type="range" min="0" max="1" step="0.01" value="0.8">
+          <label for="influence">Influence <span class="notation">d</span> <output id="influence-value" for="influence">+0.50</output></label>
+          <input id="influence" type="range" min="-1" max="1" step="0.01" value="0.5">
+        </section>
+
+        <section aria-labelledby="world-heading">
+          <h2 id="world-heading">WORLD</h2>
+          <label for="spread">Spread <output id="spread-value" for="spread">0.50</output></label>
+          <input id="spread" type="range" min="0" max="1" step="0.01" value="0.5">
+          <label for="decay">Decay <output id="decay-value" for="decay">0.05</output></label>
+          <input id="decay" type="range" min="0" max="1" step="0.01" value="0.05">
+          <label for="memory">Memory <output id="memory-value" for="memory">0.65</output></label>
+          <input id="memory" type="range" min="0" max="1" step="0.01" value="0.65">
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <div class="toolbar">
+          <div class="actions">
+            <button id="play-pause" type="button" aria-pressed="false" disabled>Pause</button>
+            <button id="clear" type="button" disabled>Clear</button>
+            <button id="export" type="button" disabled>Export PNG</button>
+          </div>
+          <p id="status" role="status">Loading Lana 4.1.0…</p>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="canvas" width="1200" height="720" aria-label="Living Canvas artwork"></canvas>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>

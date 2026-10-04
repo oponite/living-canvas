@@ -1,0 +1,114 @@
+// One generation of the 100 x 60 Living Canvas world.
+// Input: JSON {cells: [[p, d, age], ...], dt, spread, decay, memory}.
+// Output: JSON [p, d, age, ...] in row-major order.
+
+fn axis(size, offset) {
+    let indexes = array_new(size);
+    let valid = array_new(size);
+    let i = 0;
+    while (i < size) {
+        let neighbor = i + offset;
+        let inside = 1;
+        if (neighbor < 0) { neighbor = 0; inside = 0; }
+        if (neighbor >= size) { neighbor = size - 1; inside = 0; }
+        indexes[i] = neighbor;
+        valid[i] = inside;
+        i = i + 1;
+    }
+    return [tensor(indexes), tensor(valid)];
+}
+
+fn influence(p, d, rows, columns) {
+    let neighbor_p = gather(gather(p, rows[0], 0), columns[0], 1);
+    let neighbor_d = gather(gather(d, rows[0], 0), columns[0], 1);
+    let positive = relu(neighbor_d);
+    let negative = relu(neighbor_d * (-1));
+    let valid = reshape(rows[1], [60, 1]) * reshape(columns[1], [1, 100]);
+    let target_sum = (positive * neighbor_p + negative * (neighbor_p * (-1) + 1)) * valid;
+    let weight_sum = (positive + negative) * valid;
+    return [target_sum, weight_sum, neighbor_d * valid];
+}
+
+fn add_influence(left, right) {
+    return [left[0] + right[0], left[1] + right[1], left[2] + right[2]];
+}
+
+fn neighbor_totals(p, d) {
+    let row_zero = axis(60, 0);
+    let row_before = axis(60, -1);
+    let row_after = axis(60, 1);
+    let column_zero = axis(100, 0);
+    let column_before = axis(100, -1);
+    let column_after = axis(100, 1);
+
+    let northwest = influence(p, d, row_before, column_before);
+    let north = influence(p, d, row_before, column_zero);
+    let northeast = influence(p, d, row_before, column_after);
+    let west = influence(p, d, row_zero, column_before);
+    let east = influence(p, d, row_zero, column_after);
+    let southwest = influence(p, d, row_after, column_before);
+    let south = influence(p, d, row_after, column_zero);
+    let southeast = influence(p, d, row_after, column_after);
+
+    let upper = add_influence(add_influence(northwest, north), add_influence(northeast, west));
+    let lower = add_influence(add_influence(east, southwest), add_influence(south, southeast));
+    return add_influence(upper, lower);
+}
+
+fn evolve(probabilities, dispositions, dt, spread, decay, memory) {
+    let p = reshape(tensor(probabilities), [60, 100]);
+    let d = reshape(tensor(dispositions), [60, 100]);
+    let neighbors = neighbor_totals(p, d);
+    // A floor of one on the denominator lets weak dispositions remain weak.
+    let denominator = 1 + relu(neighbors[1] - 1);
+    let pressure = (neighbors[0] - p * neighbors[1]) / denominator;
+    let response = spread * (1 - memory);
+    let survival = 1 - decay * dt;
+    let raw_p = (p + response * pressure) * survival;
+    let next_p = relu(raw_p) - relu(raw_p - 1);
+    let neighbor_d = neighbors[2] / 8;
+    let raw_d = (d + response * (neighbor_d - d)) * survival;
+    let next_d = relu(raw_d + 1) - relu(raw_d - 1) - 1;
+    return [reshape(next_p, [6000]), reshape(next_d, [6000])];
+}
+
+let request = json_parse(args()[0])[1];
+let cells = request.cells;
+let dt = request.dt;
+let probabilities = array_new(6000);
+let dispositions = array_new(6000);
+let ages = array_new(6000);
+let i = 0;
+while (i < 6000) {
+    let cell = cells[i];
+    state current = state(p: cell[0], d: cell[1]);
+    probabilities[i] = current.p;
+    dispositions[i] = current.d_re;
+    ages[i] = cell[2];
+    i = i + 1;
+}
+
+let next_values = evolve(probabilities, dispositions, dt, request.spread, request.decay, request.memory);
+let flat_p = next_values[0];
+let flat_d = next_values[1];
+let output = array_new(18000);
+let index = 0;
+while (index < 6000) {
+    let probability = flat_p[index];
+    let disposition = flat_d[index];
+    // Strong negative dispositions hold their painted state long enough to
+    // form opposing bands while still repelling neighboring cells.
+    if (dispositions[index] < -0.5) {
+        probability = probabilities[index] * (1 - request.decay * dt) * 0.995 + probability * 0.005;
+        disposition = dispositions[index] * (1 - request.decay * dt) * 0.995 + disposition * 0.005;
+    }
+    if (probability < 0.0001) { probability = 0; disposition = 0; }
+    state next = state(p: probability, d: disposition);
+    output[index * 3] = next.p;
+    output[index * 3 + 1] = next.d_re;
+    let age = 0;
+    if (next.p > 0) { age = ages[index] + dt; }
+    output[index * 3 + 2] = age;
+    index = index + 1;
+}
+return json_stringify(output);
