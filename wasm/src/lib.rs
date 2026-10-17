@@ -42,7 +42,7 @@ impl LivingCanvasEngine {
         })
     }
 
-    pub fn paint(&mut self, x: f64, y: f64, radius: f64, p: f64, d: f64) -> Result<(), JsValue> {
+    pub fn paint(&mut self, x: f64, y: f64, radius: f64, p: f64, d: f64, shape: &str) -> Result<(), JsValue> {
         if !x.is_finite() || !y.is_finite() || !radius.is_finite() || radius < 0.0 {
             return Err(JsValue::from_str("invalid brush position or radius"));
         }
@@ -50,6 +50,11 @@ impl LivingCanvasEngine {
         if state::make(p, d, &mut painted) != LanaError::Ok {
             return Err(JsValue::from_str("invalid STATE(p, d)"));
         }
+        let square = match shape {
+            "circle" => false,
+            "square" => true,
+            _ => return Err(JsValue::from_str("invalid brush shape")),
+        };
         let left = ((x - radius).floor() as isize).max(0) as usize;
         let right = ((x + radius).ceil() as isize).min(WIDTH as isize - 1).max(-1);
         let top = ((y - radius).floor() as isize).max(0) as usize;
@@ -59,7 +64,8 @@ impl LivingCanvasEngine {
             for column in left..=right as usize {
                 let dx = column as f64 + 0.5 - x;
                 let dy = row as f64 + 0.5 - y;
-                if dx * dx + dy * dy > radius * radius { continue; }
+                if (square && (dx.abs() > radius || dy.abs() > radius))
+                    || (!square && dx * dx + dy * dy > radius * radius) { continue; }
                 let offset = (row * WIDTH + column) * STRIDE;
                 self.current[offset + 2] = self.current[offset];
                 self.current[offset] = painted.p as f32;

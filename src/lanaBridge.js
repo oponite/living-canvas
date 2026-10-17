@@ -15,8 +15,8 @@ export async function initialize(width, height) {
   dirty = true;
 }
 
-export function paint(x, y, radius, p, d) {
-  requireEngine().paint(x, y, radius, p, d);
+export function paint(x, y, radius, p, d, shape) {
+  requireEngine().paint(x, y, radius, p, d, shape);
   dirty = true;
 }
 

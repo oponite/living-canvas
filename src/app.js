@@ -8,6 +8,7 @@ const STEP = 1 / 30;
 const canvas = document.querySelector('#canvas');
 const status = document.querySelector('#status');
 const playPause = document.querySelector('#play-pause');
+const brushShape = document.querySelector('#brush-shape');
 const controls = Object.fromEntries(
   ['brush-size', 'intensity', 'influence', 'spread', 'decay', 'memory']
     .map((id) => [id, document.getElementById(id)]),
@@ -16,6 +17,7 @@ const controls = Object.fromEntries(
 let playing = true;
 let lastFrame = null;
 let accumulated = 0;
+let lastRendered = null;
 
 function number(id) { return Number(controls[id].value); }
 
@@ -37,13 +39,11 @@ function frame(timestamp) {
   const elapsed = (timestamp - lastFrame) / 1000;
   lastFrame = timestamp;
   if (playing && elapsed < 0.5) {
-    accumulated = Math.min(accumulated + elapsed, STEP * 8);
-    let steps = 0;
+    accumulated = Math.min(accumulated + elapsed, STEP);
     try {
-      while (accumulated >= STEP && steps < 8) {
+      if (accumulated >= STEP) {
         lana.tick(STEP, number('spread'), number('decay'), number('memory'));
         accumulated -= STEP;
-        steps += 1;
       }
     } catch (error) {
       playing = false;
@@ -52,7 +52,11 @@ function frame(timestamp) {
       status.textContent = `Simulation stopped: ${error.message || error}`;
     }
   }
-  render(canvas, lana.getStateBuffer());
+  const states = lana.getStateBuffer();
+  if (states !== lastRendered) {
+    render(canvas, states);
+    lastRendered = states;
+  }
   requestAnimationFrame(frame);
 }
 
@@ -87,7 +91,7 @@ try {
   await lana.initialize(WIDTH, HEIGHT);
   for (const button of document.querySelectorAll('.actions button')) button.disabled = false;
   attachPainting(canvas,
-    () => ({ size: number('brush-size'), p: number('intensity'), d: number('influence') }),
+    () => ({ shape: brushShape.value, size: number('brush-size'), p: number('intensity'), d: number('influence') }),
     lana.paint);
   status.textContent = '';
   requestAnimationFrame(frame);

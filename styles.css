@@ -50,6 +50,16 @@ input[type="range"] {
   cursor: pointer;
 }
 
+select {
+  width: 100%;
+  padding: 7px;
+  border: 1px solid #5e536d;
+  border-radius: 5px;
+  background: #25202f;
+  color: #f6f0fa;
+  font: inherit;
+}
+
 .workspace { display: flex; flex: 1; min-width: 0; flex-direction: column; }
 
 .toolbar {
@@ -76,7 +86,7 @@ button {
 }
 
 button:hover { background: #342943; }
-button:focus-visible, input:focus-visible { outline: 2px solid #d0a6ff; outline-offset: 3px; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #d0a6ff; outline-offset: 3px; }
 
 #status { margin: 0; color: #b9aeca; font-size: 12px; }
 #status:empty { display: none; }

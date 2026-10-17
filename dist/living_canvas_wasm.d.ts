@@ -6,7 +6,7 @@ export class LivingCanvasEngine {
   constructor(width: number, height: number);
   tick(dt: number, spread: number, decay: number, memory: number): void;
   clear(): void;
-  paint(x: number, y: number, radius: number, p: number, d: number): void;
+  paint(x: number, y: number, radius: number, p: number, d: number, shape: string): void;
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -17,11 +17,13 @@ export interface InitOutput {
   readonly livingcanvasengine_clear: (a: number) => void;
   readonly livingcanvasengine_get_state_buffer: (a: number) => [number, number];
   readonly livingcanvasengine_new: (a: number, b: number) => [number, number, number];
-  readonly livingcanvasengine_paint: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+  readonly livingcanvasengine_paint: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
   readonly livingcanvasengine_tick: (a: number, b: number, c: number, d: number, e: number) => [number, number];
   readonly __wbindgen_export_0: WebAssembly.Table;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __externref_table_dealloc: (a: number) => void;
+  readonly __wbindgen_malloc: (a: number, b: number) => number;
+  readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_start: () => void;
 }
 

@@ -21,10 +21,10 @@ export function attachPainting(canvas, getBrush, paint) {
       for (let index = 1; index <= steps; index += 1) {
         const fraction = index / steps;
         paint(previous.x + (point.x - previous.x) * fraction,
-          previous.y + (point.y - previous.y) * fraction, brush.size, brush.p, brush.d);
+          previous.y + (point.y - previous.y) * fraction, brush.size, brush.p, brush.d, brush.shape);
       }
     } else {
-      paint(point.x, point.y, brush.size, brush.p, brush.d);
+      paint(point.x, point.y, brush.size, brush.p, brush.d, brush.shape);
     }
     previous = point;
   }
